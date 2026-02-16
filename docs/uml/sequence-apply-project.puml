@@ -1,0 +1,119 @@
+@startuml Artist Applies to Project Sequence
+
+title Secuencia: Artista Aplica a un Proyecto Colaborativo
+
+actor Artista as A
+participant "TablonanAnuncios" as TB
+participant "Proyecto" as P
+participant "Solicitud" as S
+participant "Sistema de\nNotificaciones" as SN
+actor "Creador del\nProyecto" as CP
+
+autonumber
+
+== Búsqueda de Proyecto ==
+
+A -> TB: buscarProyectos(filtros)
+activate TB
+TB --> A: List<Proyecto>
+deactivate TB
+
+A -> P: ver detalles
+activate P
+P --> A: información completa
+deactivate P
+
+== Envío de Solicitud ==
+
+A -> S: crear solicitud
+activate S
+S -> S: validar datos
+S -> P: verificar disponibilidad
+activate P
+
+alt Hay plazas disponibles
+    P --> S: OK
+    deactivate P
+    
+    S -> S: guardar solicitud
+    S --> A: Solicitud enviada
+    
+    S -> SN: crear notificación
+    activate SN
+    SN -> CP: SOLICITUD_RECIBIDA
+    deactivate SN
+    
+else No hay plazas
+    P --> S: Error - sin plazas
+    deactivate P
+    S --> A: Error: Proyecto completo
+end
+
+deactivate S
+
+== Revisión por Creador ==
+
+CP -> P: ver solicitudes
+activate P
+P --> CP: List<Solicitud>
+deactivate P
+
+CP -> S: revisar solicitud
+activate S
+S --> CP: detalles completos
+S -> S: marcar como REVISADA
+deactivate S
+
+== Decisión del Creador ==
+
+alt Aceptar Solicitud
+    CP -> S: aceptar()
+    activate S
+    S -> S: cambiar estado a ACEPTADA
+    S -> P: agregar artista seleccionado
+    activate P
+    P -> P: disminuir plazas disponibles
+    
+    alt Plazas llenas
+        P -> P: cambiar estado a CERRADO
+    end
+    
+    P --> S: OK
+    deactivate P
+    
+    S -> SN: crear notificación
+    activate SN
+    SN -> A: SOLICITUD_ACEPTADA
+    deactivate SN
+    
+    S --> CP: Solicitud aceptada
+    deactivate S
+    
+else Rechazar Solicitud
+    CP -> S: actualizarEstado(RECHAZADA)
+    activate S
+    S -> S: cambiar estado a RECHAZADA
+    
+    S -> SN: crear notificación
+    activate SN
+    SN -> A: SOLICITUD_RECHAZADA
+    deactivate SN
+    
+    S --> CP: Solicitud rechazada
+    deactivate S
+end
+
+== Notificación al Artista ==
+
+A -> SN: ver notificaciones
+activate SN
+SN --> A: List<Notificacion>
+deactivate SN
+
+A -> SN: marcar como leída
+activate SN
+SN -> SN: actualizar estado
+SN --> A: OK
+deactivate SN
+
+@enduml
