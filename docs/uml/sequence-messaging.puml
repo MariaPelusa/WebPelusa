@@ -1,0 +1,121 @@
+@startuml Artist Messaging Sequence
+
+title Secuencia: Comunicación entre Artistas
+
+actor "Artista A" as A1
+participant "Mapa" as M
+participant "PerfilPublico" as PP
+actor "Artista B" as A2
+participant "Conversacion" as C
+participant "MensajePrivado" as MP
+participant "Sistema de\nNotificaciones" as SN
+
+autonumber
+
+== Búsqueda de Artista ==
+
+A1 -> M: buscarArtistas(ubicacion, radio)
+activate M
+M --> A1: List<Artista>
+deactivate M
+
+A1 -> M: filtrarPorEspecialidad("ilustración")
+activate M
+M --> A1: List<Artista> filtrada
+deactivate M
+
+A1 -> PP: ver perfil de Artista B
+activate PP
+PP --> A1: información pública + galería
+deactivate PP
+
+== Inicio de Conversación ==
+
+A1 -> C: iniciarConversacion(A2)
+activate C
+
+C -> C: verificar conversación existente
+
+alt Conversación ya existe
+    C --> A1: conversación existente
+else Nueva conversación
+    C -> C: crear nueva conversación
+    C -> C: agregar participantes (A1, A2)
+    C --> A1: conversación creada
+end
+
+deactivate C
+
+== Envío de Mensaje ==
+
+A1 -> MP: enviar mensaje
+activate MP
+
+MP -> MP: crear mensaje
+MP -> MP: asignar remitente (A1)
+MP -> MP: asignar destinatario (A2)
+
+MP -> C: agregar a conversación
+activate C
+C -> C: actualizar última actividad
+C --> MP: OK
+deactivate C
+
+MP -> SN: crear notificación
+activate SN
+SN -> A2: MENSAJE_NUEVO
+deactivate SN
+
+MP --> A1: Mensaje enviado
+deactivate MP
+
+== Lectura de Mensaje ==
+
+A2 -> C: obtenerMensajes()
+activate C
+C --> A2: List<MensajePrivado>
+deactivate C
+
+A2 -> MP: leer mensaje
+activate MP
+MP -> MP: marcarComoLeido()
+MP --> A2: contenido del mensaje
+deactivate MP
+
+== Respuesta ==
+
+A2 -> MP: responder()
+activate MP
+
+MP -> MP: crear mensaje respuesta
+MP -> MP: asignar remitente (A2)
+MP -> MP: asignar destinatario (A1)
+
+MP -> C: agregar a conversación
+activate C
+C -> C: actualizar última actividad
+C --> MP: OK
+deactivate C
+
+MP -> SN: crear notificación
+activate SN
+SN -> A1: MENSAJE_NUEVO
+deactivate SN
+
+MP --> A2: Respuesta enviada
+deactivate MP
+
+== Notificación ==
+
+A1 -> SN: ver notificaciones
+activate SN
+SN --> A1: nueva notificación de A2
+deactivate SN
+
+A1 -> C: abrir conversación
+activate C
+C -> C: obtener mensajes no leídos
+C --> A1: mensajes de la conversación
+deactivate C
+
+@enduml

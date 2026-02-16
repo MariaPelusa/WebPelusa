@@ -1,0 +1,230 @@
+@startuml Artist Collaboration Application
+
+' Title and Layout
+title Diagrama de Clases - Aplicación de Colaboración para Artistas
+scale 1.2
+
+' Entities
+
+class Usuario {
+    - id: Long
+    - nombreUsuario: String
+    - email: String
+    - password: String
+    - fechaRegistro: DateTime
+    - activo: Boolean
+    + registrar(): Boolean
+    + iniciarSesion(): Boolean
+    + cerrarSesion(): void
+    + actualizarPerfil(): Boolean
+    + eliminarCuenta(): void
+}
+
+class Artista {
+    - id: Long
+    - nombre: String
+    - apellidos: String
+    - biografia: String
+    - especialidad: String
+    - sitioWeb: String
+    - telefono: String
+    + crearPerfil(): Boolean
+    + editarPerfil(): Boolean
+    + visualizarPerfilPublico(): PerfilPublico
+}
+
+class PerfilPublico {
+    - id: Long
+    - titulo: String
+    - descripcion: String
+    - habilidades: List<String>
+    - fechaCreacion: DateTime
+    - visitas: Integer
+    + mostrarGaleria(): List<Imagen>
+    + actualizarInformacion(): Boolean
+    + obtenerEstadisticas(): Map<String, Integer>
+}
+
+class Imagen {
+    - id: Long
+    - titulo: String
+    - descripcion: String
+    - url: String
+    - fechaSubida: DateTime
+    - dimensiones: String
+    - formato: String
+    + subir(): Boolean
+    + eliminar(): Boolean
+    + actualizar(): Boolean
+    + obtenerMetadata(): Map<String, Object>
+}
+
+class MensajePrivado {
+    - id: Long
+    - asunto: String
+    - contenido: String
+    - fechaEnvio: DateTime
+    - leido: Boolean
+    + enviar(): Boolean
+    + marcarComoLeido(): void
+    + responder(): Boolean
+    + eliminar(): void
+}
+
+class Conversacion {
+    - id: Long
+    - fechaInicio: DateTime
+    - ultimaActividad: DateTime
+    - activa: Boolean
+    + iniciarConversacion(): Boolean
+    + obtenerMensajes(): List<MensajePrivado>
+    + cerrarConversacion(): void
+}
+
+class Ubicacion {
+    - id: Long
+    - direccion: String
+    - ciudad: String
+    - pais: String
+    - latitud: Double
+    - longitud: Double
+    - visible: Boolean
+    + actualizar(): Boolean
+    + ocultarUbicacion(): void
+    + mostrarUbicacion(): void
+}
+
+class Mapa {
+    - id: Long
+    - zoom: Integer
+    - centro: Coordenadas
+    + buscarArtistas(ubicacion: Ubicacion, radio: Double): List<Artista>
+    + mostrarArtistasEnMapa(): void
+    + filtrarPorEspecialidad(especialidad: String): List<Artista>
+}
+
+class TablonanAnuncios {
+    - id: Long
+    - nombre: String
+    - descripcion: String
+    - fechaCreacion: DateTime
+    + publicarProyecto(proyecto: Proyecto): Boolean
+    + buscarProyectos(filtros: Map<String, Object>): List<Proyecto>
+    + obtenerProyectosRecientes(): List<Proyecto>
+}
+
+class Proyecto {
+    - id: Long
+    - titulo: String
+    - descripcion: String
+    - requisitos: String
+    - presupuesto: Double
+    - fechaInicio: Date
+    - fechaFin: Date
+    - estado: EstadoProyecto
+    - numeroPlazas: Integer
+    - plazasDisponibles: Integer
+    + publicar(): Boolean
+    + actualizar(): Boolean
+    + cerrar(): void
+    + reabrirConvocatoria(): Boolean
+}
+
+enum EstadoProyecto {
+    BORRADOR
+    PUBLICADO
+    EN_PROCESO
+    CERRADO
+    COMPLETADO
+    CANCELADO
+}
+
+class Solicitud {
+    - id: Long
+    - fechaSolicitud: DateTime
+    - mensaje: String
+    - estado: EstadoSolicitud
+    - portfolio: String
+    + enviar(): Boolean
+    + retirar(): void
+    + actualizarEstado(estado: EstadoSolicitud): void
+}
+
+enum EstadoSolicitud {
+    PENDIENTE
+    REVISADA
+    ACEPTADA
+    RECHAZADA
+    RETIRADA
+}
+
+class Notificacion {
+    - id: Long
+    - tipo: TipoNotificacion
+    - mensaje: String
+    - fechaCreacion: DateTime
+    - leida: Boolean
+    + enviar(): Boolean
+    + marcarComoLeida(): void
+}
+
+enum TipoNotificacion {
+    MENSAJE_NUEVO
+    SOLICITUD_RECIBIDA
+    SOLICITUD_ACEPTADA
+    SOLICITUD_RECHAZADA
+    NUEVO_PROYECTO
+    PROYECTO_ACTUALIZADO
+}
+
+' Relationships
+
+Usuario "1" -- "1" Artista : representa >
+Artista "1" -- "1" PerfilPublico : tiene >
+PerfilPublico "1" -- "0..*" Imagen : contiene >
+
+Artista "1" -- "0..*" Conversacion : participa en >
+Conversacion "1" -- "2..*" Artista : entre >
+Conversacion "1" *-- "1..*" MensajePrivado : contiene >
+MensajePrivado "1" -- "1" Artista : enviado por >
+MensajePrivado "1" -- "1" Artista : recibido por >
+
+Artista "1" -- "0..1" Ubicacion : tiene >
+Mapa "1" -- "0..*" Ubicacion : muestra >
+
+TablonanAnuncios "1" -- "0..*" Proyecto : contiene >
+Proyecto "1" -- "1" Artista : creado por >
+Proyecto "1" -- "0..*" Solicitud : recibe >
+Solicitud "1" -- "1" Artista : enviada por >
+Proyecto "1" -- "0..*" Artista : selecciona >
+
+Artista "1" -- "0..*" Notificacion : recibe >
+Notificacion "1" -- "0..1" Proyecto : relacionada con >
+Notificacion "1" -- "0..1" Solicitud : relacionada con >
+Notificacion "1" -- "0..1" MensajePrivado : relacionada con >
+
+' Notes
+note right of Usuario
+    Clase principal para autenticación
+    y gestión de cuentas de usuario
+end note
+
+note right of PerfilPublico
+    Perfil visible públicamente
+    que muestra el portafolio
+    del artista
+end note
+
+note right of TablonanAnuncios
+    Tablón público donde se
+    anuncian proyectos que
+    requieren colaboración
+end note
+
+note right of Mapa
+    Sistema de geolocalización
+    para encontrar artistas
+    cercanos
+end note
+
+@enduml

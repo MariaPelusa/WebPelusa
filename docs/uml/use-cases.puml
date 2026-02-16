@@ -1,0 +1,153 @@
+@startuml Artist Collaboration Use Cases
+
+title Diagrama de Casos de Uso - Aplicación de Colaboración para Artistas
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Artista as A
+actor "Sistema de Notificaciones" as SN
+actor "Servicio de Mapas" as SM
+
+rectangle "Aplicación de Colaboración Artística" {
+  
+  package "Gestión de Usuario" {
+    usecase "Registrarse" as UC1
+    usecase "Iniciar Sesión" as UC2
+    usecase "Gestionar Perfil" as UC3
+    usecase "Cerrar Sesión" as UC4
+  }
+  
+  package "Perfil Público" {
+    usecase "Crear Perfil Público" as UC5
+    usecase "Editar Perfil Público" as UC6
+    usecase "Subir Imágenes" as UC7
+    usecase "Gestionar Galería" as UC8
+    usecase "Ver Perfil de Otro Artista" as UC9
+  }
+  
+  package "Mensajería" {
+    usecase "Iniciar Conversación" as UC10
+    usecase "Enviar Mensaje" as UC11
+    usecase "Leer Mensajes" as UC12
+    usecase "Responder Mensaje" as UC13
+  }
+  
+  package "Geolocalización" {
+    usecase "Configurar Ubicación" as UC14
+    usecase "Buscar Artistas en Mapa" as UC15
+    usecase "Filtrar por Especialidad" as UC16
+    usecase "Ver Artistas Cercanos" as UC17
+  }
+  
+  package "Tablón de Proyectos" {
+    usecase "Publicar Proyecto" as UC18
+    usecase "Buscar Proyectos" as UC19
+    usecase "Ver Detalles de Proyecto" as UC20
+    usecase "Editar Proyecto" as UC21
+    usecase "Cerrar Proyecto" as UC22
+  }
+  
+  package "Solicitudes" {
+    usecase "Enviar Solicitud" as UC23
+    usecase "Revisar Solicitudes" as UC24
+    usecase "Aceptar Solicitud" as UC25
+    usecase "Rechazar Solicitud" as UC26
+    usecase "Retirar Solicitud" as UC27
+  }
+  
+  package "Notificaciones" {
+    usecase "Recibir Notificación" as UC28
+    usecase "Ver Notificaciones" as UC29
+    usecase "Marcar como Leída" as UC30
+  }
+}
+
+' Relaciones Artista - Gestión de Usuario
+A --> UC1
+A --> UC2
+A --> UC3
+A --> UC4
+
+' Relaciones Artista - Perfil Público
+A --> UC5
+A --> UC6
+A --> UC7
+A --> UC8
+A --> UC9
+
+' Relaciones Artista - Mensajería
+A --> UC10
+A --> UC11
+A --> UC12
+A --> UC13
+
+' Relaciones Artista - Geolocalización
+A --> UC14
+A --> UC15
+A --> UC16
+A --> UC17
+
+' Relaciones Artista - Tablón de Proyectos
+A --> UC18
+A --> UC19
+A --> UC20
+A --> UC21
+A --> UC22
+
+' Relaciones Artista - Solicitudes
+A --> UC23
+A --> UC24
+A --> UC25
+A --> UC26
+A --> UC27
+
+' Relaciones Artista - Notificaciones
+A --> UC29
+A --> UC30
+
+' Relaciones con Sistemas Externos
+UC15 ..> SM : usa
+UC16 ..> SM : usa
+UC17 ..> SM : usa
+
+SN --> UC28
+
+' Relaciones Include/Extend
+UC1 ..> UC5 : <<include>>
+UC5 ..> UC7 : <<include>>
+UC10 ..> UC11 : <<include>>
+UC18 ..> UC3 : <<include>>
+UC23 ..> UC20 : <<include>>
+
+UC11 ..> UC28 : <<extend>>
+UC23 ..> UC28 : <<extend>>
+UC25 ..> UC28 : <<extend>>
+UC26 ..> UC28 : <<extend>>
+
+' Notas
+note right of UC1
+  Al registrarse, se debe
+  crear automáticamente
+  un perfil público
+end note
+
+note right of UC15
+  Usa servicio externo
+  de mapas para mostrar
+  ubicaciones
+end note
+
+note right of UC28
+  El sistema envía 
+  notificaciones automáticas
+  según eventos
+end note
+
+note bottom of UC23
+  Solo se puede enviar
+  solicitud a proyectos
+  publicados
+end note
+
+@enduml
